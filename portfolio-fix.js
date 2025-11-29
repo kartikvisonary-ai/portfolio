@@ -4,6 +4,13 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
+  // Fix image paths - replace ./my portfolio_files/ with root paths
+  const images = document.querySelectorAll('img[src*="my portfolio_files"]');
+  images.forEach((img) => {
+    const filename = img.src.split('/').pop();
+    img.src = './' + filename;
+  });
+
   // Smooth scroll utility function
   function smoothScroll(targetId) {
     const target = document.getElementById(targetId);
@@ -92,36 +99,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Scroll reveal animations - animate elements as they come into view
   function handleScrollReveal() {
-    const elements = document.querySelectorAll('[data-component-name="motion.div"]');
+    const elements = document.querySelectorAll('[data-component-name="motion.div"], [data-component-name="motion.h2"], [data-component-name="motion.p"], [style*="opacity"]');
     
     elements.forEach((el) => {
       // Check if element is in viewport
       const rect = el.getBoundingClientRect();
-      const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+      const isVisible = rect.top < window.innerHeight * 0.8 && rect.bottom > 0;
       
-      if (isVisible && el.style.opacity !== '1') {
-        // Trigger animation by ensuring opacity is visible
-        if (!el.style.opacity || el.style.opacity === '0') {
-          el.style.transition = 'opacity 0.6s ease-in-out, transform 0.6s ease-in-out';
-          el.style.opacity = '1';
-          el.style.transform = 'translateY(0)';
-        }
+      if (isVisible) {
+        // Force animation by setting visible states
+        el.style.opacity = '1';
+        el.style.transform = el.style.transform || 'translateY(0)';
+        el.style.transition = 'opacity 0.6s ease-in-out, transform 0.6s ease-in-out';
       }
     });
   }
 
   // Initial animations on page load
   window.addEventListener('load', () => {
+    // Animate all elements on load
+    document.querySelectorAll('[data-component-name*="motion"]').forEach((el) => {
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+      el.style.transition = 'opacity 0.6s ease-in-out, transform 0.6s ease-in-out';
+    });
     handleScrollReveal();
   });
 
   // Handle animations on scroll
   window.addEventListener('scroll', () => {
     handleScrollReveal();
-  });
+  }, { passive: true });
 
   // Initial call for elements already in viewport
-  handleScrollReveal();
+  setTimeout(() => {
+    handleScrollReveal();
+  }, 100);
 
   // Add CSS styles for smooth transitions
   const style = document.createElement('style');
@@ -141,8 +154,17 @@ document.addEventListener('DOMContentLoaded', function() {
     a {
       text-decoration: none;
     }
+
+    img {
+      display: block;
+    }
+
+    [data-component-name*="motion"] {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+    }
   `;
   document.head.appendChild(style);
 
-  console.log('✓ Portfolio buttons and animations fixed successfully');
+  console.log('✓ Portfolio buttons, animations, and images fixed successfully');
 });
